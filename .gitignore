@@ -1,8 +1,12 @@
 # Configuración local con credenciales
 app/config.php
 
-# Bloqueo de instalación generado en cada servidor
+# Bloqueo de instalación y clave local generados en cada entorno
 storage/installed.lock
+storage/app.key
+
+# Variables locales del entorno Docker
+.env
 
 # Logs y archivos temporales
 storage/logs/*

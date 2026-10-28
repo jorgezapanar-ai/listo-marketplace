@@ -1,0 +1,73 @@
+name: Docker smoke test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: Entorno de pruebas
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Construir y levantar el entorno
+        run: docker compose up -d --build
+
+      - name: Esperar disponibilidad
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/health.php | grep -q '"status":"ok"'; then
+              echo "Entorno disponible en el intento $attempt"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "El entorno no respondió a tiempo"
+          docker compose logs
+          exit 1
+
+      - name: Verificar páginas públicas
+        run: |
+          set -euo pipefail
+          curl -fsS http://localhost:8080/ | grep -q "Listo"
+          curl -fsS http://localhost:8080/para-proveedores.php | grep -q "S/20"
+          curl -fsS http://localhost:8080/providers.php | grep -q "Proveedor Demo"
+          curl -fsS http://localhost:8080/robots.txt | grep -q "Sitemap:"
+          curl -fsS http://localhost:8080/sitemap.xml | grep -q "para-proveedores.php"
+
+      - name: Verificar inicio de sesión de administrador
+        run: |
+          set -euo pipefail
+          curl -fsS -c cookies.txt http://localhost:8080/login.php > login.html
+          token=$(grep -o 'name="_csrf" value="[^"]*"' login.html | head -1 | sed 's/.*value="//;s/"$//')
+          test -n "$token"
+          status=$(curl -sS -b cookies.txt -c cookies.txt -o /dev/null -w "%{http_code}" \
+            -X POST \
+            --data-urlencode "action=login" \
+            --data-urlencode "_csrf=$token" \
+            --data-urlencode "phone=999111222" \
+            --data-urlencode "password=AdminListo2026" \
+            http://localhost:8080/actions.php)
+          test "$status" = "302"
+          curl -fsS -b cookies.txt http://localhost:8080/admin/index.php | grep -q "Resumen operativo"
+
+      - name: Verificar acceso bloqueado a carpetas internas
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /dev/null -w "%{http_code}" http://localhost:8080/app/config.php)
+          test "$code" = "403"
+          code=$(curl -sS -o /dev/null -w "%{http_code}" http://localhost:8080/docker/init.php)
+          test "$code" = "403"
+
+      - name: Mostrar logs si algo falló
+        if: failure()
+        run: docker compose logs
+
+      - name: Apagar el entorno
+        if: always()
+        run: docker compose down -v

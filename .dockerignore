@@ -1,0 +1,13 @@
+.git
+.github
+*.zip
+*.log
+.env
+app/config.php
+storage/app.key
+storage/installed.lock
+storage/logs/*
+!storage/logs/.gitkeep
+install-preview.png
+.DS_Store
+Thumbs.db

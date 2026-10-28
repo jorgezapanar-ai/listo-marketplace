@@ -46,7 +46,50 @@ Consulta [DEPLOYMENT.md](DEPLOYMENT.md) para el despliegue completo en cPanel.
 
 ## Probar con el equipo
 
-Este repositorio es la beta técnica del marketplace. Para probarlo:
+### Opción rápida: Docker
+
+Requisitos: Docker Desktop con `docker compose` habilitado.
+
+```bash
+docker compose up --build
+```
+
+Abre `http://localhost:8080`. La primera vez se importa el esquema, se crea la cuenta administradora y se cargan datos demo.
+
+| Rol | Celular | Contraseña |
+| --- | --- | --- |
+| Administrador | `999111222` | `AdminListo2026` |
+| Cliente | `999222333` | `ClienteListo2026` |
+| Proveedor aprobado | `999333444` | `ProveedorListo2026` |
+| Proveedor pendiente | `999444555` | `ProveedorPendiente2026` |
+
+Recorrido sugerido:
+
+1. Ingresa como cliente y revisa la solicitud demo con una propuesta pendiente.
+2. Acepta la propuesta y verifica que se habilite el contacto por WhatsApp.
+3. Ingresa como administrador y aprueba al proveedor pendiente desde el panel.
+4. Revisa el perfil público del proveedor aprobado y la reseña publicada.
+5. Revisa la landing comercial en `/para-proveedores.php`.
+
+Comandos útiles:
+
+```bash
+docker compose logs -f app   # ver inicialización y errores
+docker compose down          # detener sin borrar la base
+docker compose down -v       # detener y borrar la base de datos
+```
+
+Si el puerto 8080 está ocupado, usa otro:
+
+```bash
+APP_PORT=8081 docker compose up --build
+```
+
+En PowerShell: `$env:APP_PORT=8081; docker compose up --build`.
+
+> Estas credenciales y contraseñas de base de datos son públicas y solo sirven para desarrollo local. No uses este entorno con datos reales ni lo expongas a internet.
+
+### Opción manual
 
 1. Levanta un servidor con PHP 8.1+ y MySQL/MariaDB.
 2. Copia `app/config.example.php` a `app/config.php` y completa los datos locales, o ejecuta `install.php` desde el navegador.
@@ -54,7 +97,7 @@ Este repositorio es la beta técnica del marketplace. Para probarlo:
 4. Sigue este recorrido: solicitud → aprobación de proveedor → propuesta → aceptación → WhatsApp → cierre → reseña → moderación.
 5. Revisa la landing comercial en `para-proveedores.php`.
 
-No subas `app/config.php`, `storage/installed.lock`, logs ni respaldos al repositorio; `.gitignore` ya los excluye.
+No subas `app/config.php`, `storage/installed.lock`, `storage/app.key`, logs ni respaldos al repositorio; `.gitignore` ya los excluye.
 
 ### Alcance de la prueba
 
@@ -75,6 +118,7 @@ No subas `app/config.php`, `storage/installed.lock`, logs ni respaldos al reposi
 - `admin/`: panel administrativo.
 - `assets/`: CSS, JavaScript e identidad visual.
 - `database/`: esquema y datos iniciales.
+- `docker/`: inicialización idempotente y configuración del entorno local de pruebas.
 - `templates/`: layouts compartidos.
 - `storage/`: bloqueo de instalación y logs privados.
 - `cron/`: mantenimiento programado.

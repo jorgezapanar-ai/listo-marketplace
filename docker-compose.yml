@@ -1,0 +1,51 @@
+name: listo-marketplace
+
+services:
+  app:
+    build:
+      context: .
+    image: listo-marketplace:dev
+    ports:
+      - "${APP_PORT:-8080}:80"
+    environment:
+      APP_URL: "http://localhost:${APP_PORT:-8080}"
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: listo
+      DB_USER: listo
+      DB_PASSWORD: "${DB_PASSWORD:-listo_dev_password}"
+      ADMIN_NAME: "Administrador Listo"
+      ADMIN_PHONE: "999111222"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-AdminListo2026}"
+      SUPPORT_WHATSAPP: "51999000111"
+      SEED_DEMO: "${SEED_DEMO:-1}"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "/var/www/html/docker/healthcheck.php"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: listo
+      MARIADB_USER: listo
+      MARIADB_PASSWORD: "${DB_PASSWORD:-listo_dev_password}"
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-listo_root_dev_password}"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  db_data:
