@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es-PE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Página no encontrada</title>
+  <link rel="icon" href="<?= e(asset('favicon.svg')) ?>" type="image/svg+xml">
+  <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
+</head>
+<body class="auth-page">
+  <main class="auth-shell">
+    <section class="auth-card center-card">
+      <span class="success-mark">?</span>
+      <h1>Página no encontrada</h1>
+      <p>El enlace puede haber cambiado o ya no estar disponible.</p>
+      <a class="btn btn-primary btn-block" href="<?= e(url()) ?>">Volver al inicio</a>
+    </section>
+  </main>
+</body>
+</html>

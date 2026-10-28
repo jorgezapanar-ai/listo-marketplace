@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /app/
+Disallow: /database/
+Disallow: /storage/
+Disallow: /templates/
+Disallow: /dashboard.php
+Disallow: /account.php
+Disallow: /actions.php
+Disallow: /request-view.php
+Disallow: /requests.php
+Disallow: /opportunities.php
+Disallow: /proposals.php
+Disallow: /provider-edit.php

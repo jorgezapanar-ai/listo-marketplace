@@ -1,0 +1,16 @@
+# Configuración local con credenciales
+app/config.php
+
+# Bloqueo de instalación generado en cada servidor
+storage/installed.lock
+
+# Logs y archivos temporales
+storage/logs/*
+!storage/logs/.gitkeep
+*.log
+*.zip
+
+# Artefactos de pruebas y sistema operativo
+install-preview.png
+.DS_Store
+Thumbs.db
