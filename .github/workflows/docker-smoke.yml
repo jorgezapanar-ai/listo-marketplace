@@ -34,11 +34,21 @@ jobs:
       - name: Verificar páginas públicas
         run: |
           set -euo pipefail
-          curl -fsS http://localhost:8080/ | grep -q "Listo"
-          curl -fsS http://localhost:8080/para-proveedores.php | grep -q "S/20"
-          curl -fsS http://localhost:8080/providers.php | grep -q "Proveedor Demo"
-          curl -fsS http://localhost:8080/robots.txt | grep -q "Sitemap:"
-          curl -fsS http://localhost:8080/sitemap.xml | grep -q "para-proveedores.php"
+          check() {
+            url="$1"
+            pattern="$2"
+            file="$3"
+            curl -fsS "$url" -o "$file"
+            if ! grep -q "$pattern" "$file"; then
+              echo "No se encontró '$pattern' en $url"
+              exit 1
+            fi
+          }
+          check http://localhost:8080/ "Listo" home.html
+          check http://localhost:8080/para-proveedores.php "S/20" proveedores.html
+          check http://localhost:8080/providers.php "Proveedor Demo" directorio.html
+          check http://localhost:8080/robots.txt "Sitemap:" robots.txt
+          check http://localhost:8080/sitemap.xml "para-proveedores.php" sitemap.xml
 
       - name: Verificar inicio de sesión de administrador
         run: |
@@ -54,7 +64,8 @@ jobs:
             --data-urlencode "password=AdminListo2026" \
             http://localhost:8080/actions.php)
           test "$status" = "302"
-          curl -fsS -b cookies.txt http://localhost:8080/admin/index.php | grep -q "Resumen operativo"
+          curl -fsS -b cookies.txt http://localhost:8080/admin/index.php -o admin.html
+          grep -q "Resumen operativo" admin.html
 
       - name: Verificar acceso bloqueado a carpetas internas
         run: |
